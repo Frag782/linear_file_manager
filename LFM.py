@@ -1,7 +1,10 @@
-# remove_empty: removes any undesired whitespace, tab, newline
-# alpha_sort: sorts data in alphanumeric order
-# remove_entry: removes first occurence of <expression> found in <filename> file - actually replaced by ''
+import re
 
+# add_entry: adds <entry> to <filename> in alphanumeric order and returns its index
+# sorted <key> is a callback to str.casefold() which makes the comparison case-insensitive
+
+
+				########## FORMATTING DATA ##########
 def remove_empty(data):
 	empty_at_start = r'[\n\s\t]+'
 	empty_at_end = r'\n[\n\s\t]+$'
@@ -25,18 +28,28 @@ def remove_empty(data):
 		data = data.replace( re.search(empty_after_newline, data)[0], '\n')     # replace all occurences of <empty_after_newline>
 
 	return data
+	
+def alpha_sort(data):
+	data = remove_empty(data)
+	data = sorted(data.split('\n')[:-1], key=str.casefold)
+	data = ''.join([line + '\n' for line in data])
+	return data
 
-def alpha_sort(filename):
+				########## USING DATA ##########
+def read_data(filename):
+	with open(filename, 'r') as f:
+		return f.readlines()
+
+def add_entry(filename, entry):
 	with open(filename, 'r+') as f:
-		file_as_string = f.read()
-		sorted_file = sorted( (remove_empty(file_as_string)).split('\n')[:-1] )
-		sorted_file = ''.join([line + '\n' for line in sorted_file])
-		
+		updated_file = alpha_sort(f.read() + entry + '\n')
 		f.seek(0)
 		f.truncate()
-		f.write()
-		
-def remove_entry(expression, filename):
+		f.write(updated_file)
+		entry_index = updated_file.split('\n')[:-1].index(entry)
+		return entry_index	
+
+def remove_entry(filename, expression):
 	with open(filename, 'r+') as f:
 		file_as_string = f.read()
 		expression_match = re.search(expression, file_as_string)
