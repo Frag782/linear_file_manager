@@ -1,15 +1,6 @@
-# remove_entry: removes first occurence of <expression> found in <data> string - actually replaced by ''
 # remove_empty: removes any undesired whitespace, tab, newline
-
-def remove_entry(expression, data):
-	match = re.search(expression, data)
-
-	if match:
-		start, end = match.span()[0], match.span()[1]
-		data = ''.join( (data[:start], data[end:]) )
-
-	data = remove_empty(data)
-	return data
+# alpha_sort: sorts data in alphanumeric order
+# remove_entry: removes first occurence of <expression> found in <filename> file - actually replaced by ''
 
 def remove_empty(data):
 	empty_at_start = r'[\n\s\t]+'
@@ -35,8 +26,24 @@ def remove_empty(data):
 
 	return data
 
-def alpha_sort(data):
-	data = remove_empty(data)
-	data = sorted(data.split('\n')[:-1])
-	data = ''.join([line + '\n' for line in data])
-	return data
+def alpha_sort(filename):
+	with open(filename, 'r+') as f:
+		file_as_string = f.read()
+		sorted_file = sorted( (remove_empty(file_as_string)).split('\n')[:-1] )
+		sorted_file = ''.join([line + '\n' for line in sorted_file])
+		
+		f.seek(0)
+		f.truncate()
+		f.write()
+		
+def remove_entry(expression, filename):
+	with open(filename, 'r+') as f:
+		file_as_string = f.read()
+		expression_match = re.search(expression, file_as_string)
+		if expression_match:
+			updated_file = ''.join( (file_as_string[:expression_match.span()[0]], file_as_string[expression_match.span()[1]:]) )
+			updated_file = remove_empty(updated_file)
+			
+			f.seek(0)
+			f.truncate()
+			f.write(updated_file)
